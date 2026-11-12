@@ -9,7 +9,7 @@ A tiny browser game: click the button. It won't let you.
 - The button **vanishes in a puff of particles** when your cursor gets close, then reappears somewhere far from you.
 - Its **eyes follow your cursor**, it shakes more nervously the closer you get, and it glows as you approach.
 - There is one difficulty: **Impossible**. It dodges from 230px away and is back within 130ms, so a pointer essentially never gets there.
-- A timer, dodge counter and best time (saved in `localStorage`) keep score. In the unlikely event you catch it, there's confetti.
+- A dodge counter keeps score. In the unlikely event you catch it, there's confetti.
 - On touch screens it dodges as your finger lands, before the tap registers.
 - **No keyboard allowed.** The button can't be focused or activated from the keyboard. Pressing Tab, Enter, Space or an arrow key just gets you a "nice try" message.
 

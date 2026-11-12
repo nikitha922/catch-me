@@ -26,8 +26,6 @@ const target = $<HTMLButtonElement>('target')
 const labelEl = $<HTMLSpanElement>('label')
 const taunt = $<HTMLParagraphElement>('taunt')
 const dodgesEl = $<HTMLElement>('dodges')
-const timeEl = $<HTMLElement>('time')
-const bestEl = $<HTMLElement>('best')
 const win = $<HTMLElement>('win')
 const notice = $<HTMLElement>('notice')
 const canvas = $<HTMLCanvasElement>('fx')
@@ -37,26 +35,12 @@ const pupils = [...target.querySelectorAll<HTMLElement>('.eye i')]
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
 const pick = <T,>(xs: T[]) => xs[Math.floor(Math.random() * xs.length)]
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n))
-const fmt = (ms: number) => `${(ms / 1000).toFixed(1)}s`
 
 // ---------- State ----------
 let dodges = 0
 let hiding = false
 let caught = false
-let startedAt = 0
-let elapsed = 0
 let pointer = { x: -999, y: -999 }
-
-const BEST_KEY = 'catch-me:best'
-const readBest = () => {
-  const v = Number(localStorage.getItem(BEST_KEY))
-  return v > 0 ? v : null
-}
-
-function renderBest() {
-  const b = readBest()
-  bestEl.textContent = b ? fmt(b) : '–'
-}
 
 // ---------- Geometry ----------
 function bounds() {
@@ -222,8 +206,6 @@ function onPointer(e: PointerEvent) {
   pointer = { x: e.clientX, y: e.clientY }
   if (caught) return
 
-  if (!startedAt) startedAt = performance.now()
-
   // Eyes follow the cursor.
   const r = target.getBoundingClientRect()
   const cx = r.left + r.width / 2
@@ -257,19 +239,11 @@ function catchIt(e: MouseEvent) {
     return
   }
   caught = true
-  elapsed = performance.now() - (startedAt || performance.now())
   target.classList.remove('nervous')
 
-  const prev = readBest()
-  const record = !prev || elapsed < prev
-  if (record) localStorage.setItem(BEST_KEY, String(Math.round(elapsed)))
-  renderBest()
-
-  $('w-time').textContent = fmt(elapsed)
   $('w-dodges').textContent = String(dodges)
   $('win-sub').textContent =
     dodges === 0 ? 'First try. Suspiciously fast.' : 'A lightning-quick click. Respect.'
-  if (record) $('win-sub').textContent += ' New best!'
   win.hidden = false
   confetti()
   $('again').focus()
@@ -279,10 +253,7 @@ function reset() {
   caught = false
   hiding = false
   dodges = 0
-  startedAt = 0
-  elapsed = 0
   dodgesEl.textContent = '0'
-  timeEl.textContent = '0.0s'
   win.hidden = true
   target.classList.remove('vanish', 'nervous')
   target.style.setProperty('--near', '0')
@@ -290,15 +261,8 @@ function reset() {
   setTaunt('Go on. Click the button.')
   const b = bounds()
   place((b.minX + b.maxX) / 2, (b.minY + b.maxY) / 2)
-  renderBest()
   target.focus({ preventScroll: true })
   target.blur()
-}
-
-function tick() {
-  if (startedAt && !caught) timeEl.textContent = fmt(performance.now() - startedAt)
-  else if (caught) timeEl.textContent = fmt(elapsed)
-  requestAnimationFrame(tick)
 }
 
 // ---------- Wire up ----------
@@ -324,4 +288,3 @@ stage.addEventListener('contextmenu', (e) => e.preventDefault())
 
 resizeCanvas()
 reset()
-tick()
