@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#120d2b" />
+    <meta name="theme-color" content="#0e1013" />
     <title>Catch Me</title>
   </head>
   <body>
@@ -21,7 +21,7 @@
 
       <p id="taunt" class="taunt" aria-live="polite">Go on. Click the button.</p>
 
-      <button id="target" class="target" type="button" aria-label="Catch me">
+      <button id="target" class="target" type="button" tabindex="-1" aria-label="Catch me">
         <span class="eyes" aria-hidden="true">
           <span class="eye"><i></i></span>
           <span class="eye"><i></i></span>
@@ -47,7 +47,9 @@
         </div>
       </section>
 
-      <p class="hint">Tip: it can't dodge a keyboard. Try <kbd>Tab</kbd> + <kbd>Enter</kbd>, if you're feeling sneaky.</p>
+      <p id="notice" class="notice" role="status" aria-live="polite"></p>
+
+      <p class="hint">Mouse or touch only. Keyboards not welcome.</p>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

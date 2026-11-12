@@ -31,7 +31,6 @@ const TAUNTS = [
   'Missed me.',
   'Wow. Persistent.',
   'Over here!',
-  'Have you tried a keyboard?',
   'Still here.',
 ]
 const LABELS = ['Nope', 'Too slow', 'Missed', 'Haha', 'Catch me', 'Try again', 'Whoops']
@@ -46,6 +45,7 @@ const timeEl = $<HTMLElement>('time')
 const bestEl = $<HTMLElement>('best')
 const levelsEl = $<HTMLElement>('levels')
 const win = $<HTMLElement>('win')
+const notice = $<HTMLElement>('notice')
 const canvas = $<HTMLCanvasElement>('fx')
 const ctx = canvas.getContext('2d')!
 const pupils = [...target.querySelectorAll<HTMLElement>('.eye i')]
@@ -170,7 +170,7 @@ const kick = () => {
   if (!raf) raf = requestAnimationFrame(loop)
 }
 
-const PALETTE = ['#ff7ab6', '#7c5cff', '#46e3ff', '#ffd166', '#5ef0a5', '#ffffff']
+const PALETTE = ['#ff6b6b', '#ffb347', '#46e3ff', '#ffd166', '#5ef0a5', '#ffffff']
 
 function puff(x: number, y: number) {
   for (let i = 0; i < 18; i++) {
@@ -225,11 +225,7 @@ function dodge() {
   target.classList.remove('nervous')
 
   setTaunt(
-    dodges === 1
-      ? 'Whoa, where did it go?'
-      : level.key === 'impossible' && dodges >= 25
-        ? 'Psst… Tab, then Enter.'
-        : pick(TAUNTS),
+    dodges === 1 ? 'Whoa, where did it go?' : pick(TAUNTS),
   )
 
   window.setTimeout(() => {
@@ -271,11 +267,23 @@ function onPointer(e: PointerEvent) {
   if (!tired() && d < level.radius) dodge()
 }
 
+let noticeTimer = 0
+function showNotice(text: string) {
+  notice.textContent = text
+  notice.classList.add('show')
+  window.clearTimeout(noticeTimer)
+  noticeTimer = window.setTimeout(() => notice.classList.remove('show'), 2600)
+}
+
 function catchIt(e: MouseEvent) {
   if (caught) return
+  // detail === 0 means the click came from the keyboard (or a script), not a pointer.
+  if (e.detail === 0) {
+    showNotice('Nice try, but you can’t reach me with the keyboard.')
+    return
+  }
   caught = true
   elapsed = performance.now() - (startedAt || performance.now())
-  const keyboard = e.detail === 0
   target.classList.remove('nervous')
 
   const prev = readBest()
@@ -286,9 +294,8 @@ function catchIt(e: MouseEvent) {
   $('w-time').textContent = fmt(elapsed)
   $('w-dodges').textContent = String(dodges)
   $('w-level').textContent = level.label
-  $('win-sub').textContent = keyboard
-    ? 'Keyboard? Sneaky. It never saw that coming.'
-    : dodges === 0
+  $('win-sub').textContent =
+    dodges === 0
       ? 'First try. Suspiciously fast.'
       : tired()
         ? 'It got tired and gave up. Still counts.'
@@ -351,6 +358,13 @@ function tick() {
 document.addEventListener('pointermove', onPointer)
 document.addEventListener('pointerdown', onPointer) // touch: dodge before the tap lands
 target.addEventListener('click', catchIt)
+// The button is never focusable by keyboard; if something focuses it anyway, throw the focus back.
+target.addEventListener('focus', () => target.blur())
+document.addEventListener('keydown', (e) => {
+  const reaching = ['Tab', 'Enter', ' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)
+  const idle = document.activeElement === document.body || document.activeElement === stage
+  if (reaching && idle && !caught) showNotice('Nice try, but you can’t reach me with the keyboard.')
+})
 target.addEventListener('animationend', () => target.classList.remove('pop'))
 $('again').addEventListener('click', reset)
 $('next').addEventListener('click', () => setLevel(LEVELS[Math.min(LEVELS.length - 1, LEVELS.indexOf(level) + 1)]))

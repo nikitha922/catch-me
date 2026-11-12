@@ -11,7 +11,7 @@ A tiny browser game: click the button. It won't let you.
 - Pick a difficulty. Harder levels dodge from further away and reappear faster. On Easy, Normal and Hard the button eventually gets **tired** and lets you win. On Impossible it never does.
 - A timer, dodge counter and per-level best time (saved in `localStorage`) keep score. Catching it triggers confetti.
 - On touch screens it dodges as your finger lands, before the tap registers.
-- The button can't dodge a keyboard: `Tab` + `Enter` always catches it. This also keeps the game accessible.
+- **No keyboard allowed.** The button can't be focused or activated from the keyboard. Pressing Tab, Enter, Space or an arrow key just gets you a "nice try" message.
 
 | Level | Dodge distance | Dodges before it tires |
 | --- | --- | --- |
@@ -27,7 +27,7 @@ A tiny browser game: click the button. It won't let you.
 | Language | TypeScript (no framework) |
 | Build tool | Vite |
 | Effects | Canvas 2D particles (puffs and confetti) |
-| Styling | Plain CSS with gradients and CSS animations |
+| Styling | Plain CSS with coral and amber gradients and CSS animations |
 | Hosting | GitHub Pages (via `gh-pages`) |
 
 ## Getting started
