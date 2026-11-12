@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#120d2b" />
+    <title>Catch Me</title>
+  </head>
+  <body>
+    <main id="stage">
+      <header class="hud">
+        <h1>Catch me<span>.</span></h1>
+        <div class="stats">
+          <div><small>Dodges</small><b id="dodges">0</b></div>
+          <div><small>Time</small><b id="time">0.0s</b></div>
+          <div><small>Best</small><b id="best">–</b></div>
+        </div>
+        <div class="levels" role="radiogroup" aria-label="Difficulty" id="levels"></div>
+      </header>
+
+      <p id="taunt" class="taunt" aria-live="polite">Go on. Click the button.</p>
+
+      <button id="target" class="target" type="button" aria-label="Catch me">
+        <span class="eyes" aria-hidden="true">
+          <span class="eye"><i></i></span>
+          <span class="eye"><i></i></span>
+        </span>
+        <span class="label" id="label">Catch me</span>
+      </button>
+
+      <canvas id="fx" aria-hidden="true"></canvas>
+
+      <section id="win" class="win" hidden role="dialog" aria-modal="true" aria-labelledby="win-title">
+        <div class="win-card">
+          <h2 id="win-title">Gotcha!</h2>
+          <p id="win-sub"></p>
+          <dl>
+            <div><dt>Time</dt><dd id="w-time"></dd></div>
+            <div><dt>Dodges</dt><dd id="w-dodges"></dd></div>
+            <div><dt>Level</dt><dd id="w-level"></dd></div>
+          </dl>
+          <div class="win-actions">
+            <button id="again" class="btn" type="button">Play again</button>
+            <button id="next" class="btn btn-alt" type="button">Harder level</button>
+          </div>
+        </div>
+      </section>
+
+      <p class="hint">Tip: it can't dodge a keyboard. Try <kbd>Tab</kbd> + <kbd>Enter</kbd>, if you're feeling sneaky.</p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
