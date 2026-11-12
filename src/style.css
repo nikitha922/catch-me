@@ -74,34 +74,6 @@ h1 span {
   font-size: 22px;
   font-variant-numeric: tabular-nums;
 }
-.levels {
-  display: inline-flex;
-  padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-}
-.levels button {
-  border: none;
-  background: transparent;
-  border-radius: 10px;
-  padding: 7px 14px;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.levels button:hover {
-  color: var(--text);
-}
-.levels button[aria-checked='true'] {
-  background: linear-gradient(135deg, var(--coral), var(--amber));
-  color: #2a1204;
-  box-shadow: 0 6px 18px -6px rgba(255, 107, 107, 0.8);
-}
 
 .taunt {
   position: absolute;
@@ -158,12 +130,6 @@ h1 span {
   transform: scale(0.4) rotate(-12deg);
   pointer-events: none;
 }
-.target.tired {
-  animation: none;
-  background: linear-gradient(135deg, #5ef0a5, #46e3ff);
-  box-shadow: 0 14px 34px -10px rgba(70, 227, 255, 0.9);
-  color: #06281c;
-}
 .target.pop {
   animation: pop 0.28s cubic-bezier(0.2, 1.6, 0.4, 1);
 }
@@ -204,11 +170,6 @@ h1 span {
   border-radius: 50%;
   background: #1a1410;
   transition: transform 0.05s linear;
-}
-.tired .eye i {
-  height: 3px;
-  margin-top: -1.5px;
-  border-radius: 2px;
 }
 
 /* ---------- Effects ---------- */
@@ -302,7 +263,7 @@ h1 span {
 }
 dl {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   margin: 0 0 22px;
 }
@@ -358,9 +319,6 @@ dd {
   }
   .stats {
     gap: 18px;
-  }
-  .levels button {
-    padding: 6px 10px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

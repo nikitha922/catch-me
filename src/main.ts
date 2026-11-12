@@ -1,24 +1,9 @@
 import './style.css'
 
-type LevelKey = 'easy' | 'normal' | 'hard' | 'impossible'
-
-interface Level {
-  key: LevelKey
-  label: string
-  /** How close (px) the cursor can get before the button bolts. */
-  radius: number
-  /** Dodges before the button gets tired and lets you win. */
-  budget: number
-  /** How long (ms) it stays hidden after each dodge. */
-  delay: number
-}
-
-const LEVELS: Level[] = [
-  { key: 'easy', label: 'Easy', radius: 90, budget: 4, delay: 380 },
-  { key: 'normal', label: 'Normal', radius: 130, budget: 9, delay: 280 },
-  { key: 'hard', label: 'Hard', radius: 170, budget: 16, delay: 200 },
-  { key: 'impossible', label: 'Impossible', radius: 230, budget: Infinity, delay: 130 },
-]
+/** How close (px) the cursor can get before the button bolts. */
+const RADIUS = 230
+/** How long (ms) it stays hidden after each dodge. */
+const DELAY = 130
 
 const TAUNTS = [
   'Too slow.',
@@ -43,7 +28,6 @@ const taunt = $<HTMLParagraphElement>('taunt')
 const dodgesEl = $<HTMLElement>('dodges')
 const timeEl = $<HTMLElement>('time')
 const bestEl = $<HTMLElement>('best')
-const levelsEl = $<HTMLElement>('levels')
 const win = $<HTMLElement>('win')
 const notice = $<HTMLElement>('notice')
 const canvas = $<HTMLCanvasElement>('fx')
@@ -56,7 +40,6 @@ const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n
 const fmt = (ms: number) => `${(ms / 1000).toFixed(1)}s`
 
 // ---------- State ----------
-let level = LEVELS[Number(localStorage.getItem('catch-me:level') ?? 1)] ?? LEVELS[1]
 let dodges = 0
 let hiding = false
 let caught = false
@@ -64,9 +47,9 @@ let startedAt = 0
 let elapsed = 0
 let pointer = { x: -999, y: -999 }
 
-const bestKey = () => `catch-me:best:${level.key}`
+const BEST_KEY = 'catch-me:best'
 const readBest = () => {
-  const v = Number(localStorage.getItem(bestKey()))
+  const v = Number(localStorage.getItem(BEST_KEY))
   return v > 0 ? v : null
 }
 
@@ -113,7 +96,7 @@ function randomSpot() {
     const dx = Math.max(x - pointer.x, 0, pointer.x - (x + b.w))
     const dy = Math.max(y - pointer.y, 0, pointer.y - (y + b.h))
     const d = Math.hypot(dx, dy)
-    if (d > level.radius * 1.4 + 60) return { x, y }
+    if (d > RADIUS * 1.4 + 60) return { x, y }
     if (d > best.d) best = { x, y, d }
   }
   return best
@@ -209,10 +192,6 @@ function setTaunt(text: string) {
   taunt.textContent = text
 }
 
-function tired() {
-  return dodges >= level.budget
-}
-
 function dodge() {
   if (hiding || caught) return
   hiding = true
@@ -233,15 +212,10 @@ function dodge() {
     const spot = randomSpot()
     place(spot.x, spot.y)
     labelEl.textContent = pick(LABELS)
-    if (tired()) {
-      target.classList.add('tired')
-      labelEl.textContent = 'Fine. You got me.'
-      setTaunt('Okay, okay. I’m tired. Go on.')
-    }
     target.classList.remove('vanish')
     target.classList.add('pop')
     hiding = false
-  }, level.delay)
+  }, DELAY)
 }
 
 function onPointer(e: PointerEvent) {
@@ -260,11 +234,11 @@ function onPointer(e: PointerEvent) {
 
   if (hiding) return
   const d = distanceToButton(e.clientX, e.clientY)
-  const near = clamp(1 - d / (level.radius * 2), 0, 1)
+  const near = clamp(1 - d / (RADIUS * 2), 0, 1)
   target.style.setProperty('--near', near.toFixed(2))
-  target.classList.toggle('nervous', near > 0.25 && !tired())
+  target.classList.toggle('nervous', near > 0.25)
 
-  if (!tired() && d < level.radius) dodge()
+  if (d < RADIUS) dodge()
 }
 
 let noticeTimer = 0
@@ -288,20 +262,14 @@ function catchIt(e: MouseEvent) {
 
   const prev = readBest()
   const record = !prev || elapsed < prev
-  if (record) localStorage.setItem(bestKey(), String(Math.round(elapsed)))
+  if (record) localStorage.setItem(BEST_KEY, String(Math.round(elapsed)))
   renderBest()
 
   $('w-time').textContent = fmt(elapsed)
   $('w-dodges').textContent = String(dodges)
-  $('w-level').textContent = level.label
   $('win-sub').textContent =
-    dodges === 0
-      ? 'First try. Suspiciously fast.'
-      : tired()
-        ? 'It got tired and gave up. Still counts.'
-        : 'A lightning-quick click. Respect.'
+    dodges === 0 ? 'First try. Suspiciously fast.' : 'A lightning-quick click. Respect.'
   if (record) $('win-sub').textContent += ' New best!'
-  $('next').hidden = level.key === 'impossible'
   win.hidden = false
   confetti()
   $('again').focus()
@@ -316,7 +284,7 @@ function reset() {
   dodgesEl.textContent = '0'
   timeEl.textContent = '0.0s'
   win.hidden = true
-  target.classList.remove('vanish', 'tired', 'nervous')
+  target.classList.remove('vanish', 'nervous')
   target.style.setProperty('--near', '0')
   labelEl.textContent = 'Catch me'
   setTaunt('Go on. Click the button.')
@@ -325,27 +293,6 @@ function reset() {
   renderBest()
   target.focus({ preventScroll: true })
   target.blur()
-}
-
-function renderLevels() {
-  levelsEl.replaceChildren(
-    ...LEVELS.map((l) => {
-      const b = document.createElement('button')
-      b.type = 'button'
-      b.role = 'radio'
-      b.textContent = l.label
-      b.setAttribute('aria-checked', String(l.key === level.key))
-      b.addEventListener('click', () => setLevel(l))
-      return b
-    }),
-  )
-}
-
-function setLevel(l: Level) {
-  level = l
-  localStorage.setItem('catch-me:level', String(LEVELS.indexOf(l)))
-  renderLevels()
-  reset()
 }
 
 function tick() {
@@ -367,7 +314,6 @@ document.addEventListener('keydown', (e) => {
 })
 target.addEventListener('animationend', () => target.classList.remove('pop'))
 $('again').addEventListener('click', reset)
-$('next').addEventListener('click', () => setLevel(LEVELS[Math.min(LEVELS.length - 1, LEVELS.indexOf(level) + 1)]))
 window.addEventListener('resize', () => {
   resizeCanvas()
   const b = bounds()
@@ -377,6 +323,5 @@ window.addEventListener('resize', () => {
 stage.addEventListener('contextmenu', (e) => e.preventDefault())
 
 resizeCanvas()
-renderLevels()
 reset()
 tick()
